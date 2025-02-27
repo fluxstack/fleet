@@ -1,4 +1,4 @@
-package restful
+package jsonapi
 
 import (
 	"fmt"

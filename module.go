@@ -1,11 +1,11 @@
 package fastapi
 
 import (
-	"github.com/lynx-go/lynx/integration"
-	"net/http"
+	"github.com/go-chi/chi/v5"
+	"github.com/lynx-go/lynx/hook"
 )
 
 type Module interface {
-	integration.Integration
-	ServeHTTP(http.ResponseWriter, *http.Request)
+	hook.Hook
+	Mount(router chi.Router)
 }
