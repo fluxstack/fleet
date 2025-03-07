@@ -7,6 +7,21 @@ import (
 	"strings"
 )
 
+func New(code int, message string) *APIError {
+	return &APIError{
+		Code:    code,
+		Message: message,
+	}
+}
+
+func FromError(err error) *APIError {
+	return &APIError{
+		Code:    -1,
+		Message: err.Error(),
+		err:     err,
+	}
+}
+
 type APIError struct {
 	Code    int            `json:"code"`
 	Message string         `json:"message"`
