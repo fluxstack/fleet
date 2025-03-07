@@ -1,7 +1,0 @@
-auth:
-  jwt_secret: jdfaoejoajeoajfoejaofjoej
-
-data:
-  database:
-    driver: "mysql"
-    source: root:123456@tcp(127.0.0.1:3306)/cocos_db?parseTime=true&loc=Local&charset=utf8mb4

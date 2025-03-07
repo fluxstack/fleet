@@ -2,7 +2,6 @@ package fastapi
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
 	"github.com/lynx-go/lynx/hook"
 	"go.uber.org/multierr"
 	"golang.org/x/sync/errgroup"
@@ -11,11 +10,11 @@ import (
 
 type Option func(api *API)
 
-func WithRouter(r chi.Router) Option {
-	return func(api *API) {
-		api.router = r
-	}
-}
+//func WithRouter(r chi.Router) Option {
+//	return func(api *API) {
+//		api.router = r
+//	}
+//}
 
 func WithModules(modules ...Module) Option {
 	return func(api *API) {
@@ -24,7 +23,7 @@ func WithModules(modules ...Module) Option {
 }
 
 type API struct {
-	router chi.Router
+	router http.Handler
 	mods   []Module
 }
 
@@ -66,17 +65,17 @@ func NewAPI(opts ...Option) *API {
 	}
 	api.ensureDefaults()
 
-	for _, mod := range api.mods {
-		mod := mod
-		mod.Mount(api.router)
-	}
+	//for _, mod := range api.mods {
+	//mod := mod
+	//mod.Mount(api.router)
+	//}
 	return api
 }
 
 func (api *API) ensureDefaults() {
-	if api.router == nil {
-		api.router = chi.NewRouter()
-	}
+	//if api.router == nil {
+	//	api.router = chi.NewRouter()
+	//}
 }
 func (api *API) Router() http.Handler {
 	return api.router

@@ -2,53 +2,23 @@ package jsonapi
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-type Options struct {
-	bindingErrorHandler ErrorHandler
-	handleErrorHandler  ErrorHandler
-}
-
-type Option func(*Options)
-
-func WithBindingErrorHandler(bindingErrorHandler ErrorHandler) Option {
-	return func(o *Options) {
-		o.bindingErrorHandler = bindingErrorHandler
-	}
-}
-
-var defaultOptions = &Options{}
-
-func SetOptions(opts ...Option) {
-	for _, opt := range opts {
-		opt(defaultOptions)
-	}
-}
-
-func WithHandleErrorHandler(handleErrorHandler ErrorHandler) Option {
-	return func(o *Options) {
-		o.handleErrorHandler = handleErrorHandler
-	}
-}
-
 type HandlerFunc[I any, O any] func(ctx context.Context, in I) (O, error)
 
-type ErrorHandler func(w http.ResponseWriter, r *http.Request, err error)
-
-func H[I any, O any](h HandlerFunc[*I, *O]) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func H[I any, O any](h HandlerFunc[*I, *O]) echo.HandlerFunc {
+	return func(ec echo.Context) error {
 		in := new(I)
-		if err := json.NewDecoder(r.Body).Decode(in); err != nil {
-			defaultOptions.bindingErrorHandler(w, r, err)
-			return
+		if err := ec.Bind(in); err != nil {
+			return err
 		}
-		out, err := h(r.Context(), in)
+		out, err := h(ec.Request().Context(), in)
 		if err != nil {
-			defaultOptions.handleErrorHandler(w, r, err)
-			return
+			return err
 		}
-		R(w).OK(out)
+
+		return ec.JSON(http.StatusOK, out)
 	}
 }
