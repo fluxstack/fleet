@@ -41,7 +41,7 @@ func (uid UserID) String() string {
 }
 
 func (uid UserID) Int64() int64 {
-	return cast.ToInt64(uid)
+	return cast.ToInt64(uid.String())
 }
 
 func (uid UserID) Valid() bool {
