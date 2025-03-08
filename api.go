@@ -1,4 +1,4 @@
-package fastapi
+package flumix
 
 import (
 	"context"
@@ -28,7 +28,7 @@ type API struct {
 }
 
 func (api *API) Name() string {
-	return "fastapi"
+	return "flumix"
 }
 
 func (api *API) Start(ctx context.Context) error {

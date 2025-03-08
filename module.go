@@ -1,4 +1,4 @@
-package fastapi
+package flumix
 
 import (
 	"github.com/lynx-go/lynx/hook"

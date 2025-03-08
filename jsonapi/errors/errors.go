@@ -1,10 +1,6 @@
 package errors
 
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-)
+import "github.com/lynx-go/x/json"
 
 func New(code int, message string) *APIError {
 	return &APIError{
@@ -47,25 +43,7 @@ type ErrorItem struct {
 }
 
 func (e *APIError) Error() string {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "fastapi: Error %d: ", e.Code)
-	if e.Message != "" {
-		fmt.Fprintf(&buf, "%s", e.Message)
-	}
-	if len(e.Details) > 0 {
-		var detailBuf bytes.Buffer
-		enc := json.NewEncoder(&detailBuf)
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(e.Details); err == nil {
-			fmt.Fprint(&buf, "\nDetails:")
-			fmt.Fprintf(&buf, "\n%s", detailBuf.String())
-
-		}
-	}
-
-	fmt.Fprintln(&buf, "\nMore details:")
-
-	return buf.String()
+	return json.SafeMarshalString(e)
 }
 
 var _ error = new(APIError)
