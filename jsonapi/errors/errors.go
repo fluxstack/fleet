@@ -28,13 +28,13 @@ type APIError struct {
 	err     error
 }
 
-func (e *APIError) Wrap(err error) {
+func (e *APIError) Wrap(err error) *APIError {
 	e.err = err
 	if e.Details == nil {
 		e.Details = make(map[string]any)
 	}
 	e.Details["internal_error"] = err.Error()
-
+	return e
 }
 
 func (e *APIError) Unwrap() error {
