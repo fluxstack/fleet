@@ -1,4 +1,4 @@
-module github.com/fluxstack/fluxbase
+module github.com/fluxstack/flumix
 
 go 1.23.0
 
