@@ -16,9 +16,9 @@ func H[I any, O any](h HandlerFunc[*I, *O]) echo.HandlerFunc {
 		if err := ec.Bind(in); err != nil {
 			return err
 		}
-		claims := ec.Get(ContextKeyJWT).(jwt.Claims)
+		token := ec.Get(ContextKeyJWT).(*jwt.Token)
 		ctx := ec.Request().Context()
-		sub, _ := claims.GetSubject()
+		sub, _ := token.Claims.GetSubject()
 		ctx = context.WithValue(ctx, ContextKeyCurrentUser, sub)
 		ec.SetRequest(ec.Request().WithContext(ctx))
 		out, err := h(ctx, in)
