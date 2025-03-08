@@ -1,13 +1,13 @@
 package jsonapi
 
 import (
-	"github.com/fluxstack/flumix/jsonapi/apierror"
+	"github.com/fluxstack/flumix/jsonapi/errors"
 )
 
 type M map[string]interface{}
 
 type Response[T any] struct {
-	apierror.APIError
+	errors.APIError
 	Data T `json:"data"`
 }
 
