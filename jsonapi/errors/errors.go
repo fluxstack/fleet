@@ -30,6 +30,11 @@ type APIError struct {
 
 func (e *APIError) Wrap(err error) {
 	e.err = err
+	if e.Details == nil {
+		e.Details = make(map[string]any)
+	}
+	e.Details["internal_error"] = err.Error()
+
 }
 
 func (e *APIError) Unwrap() error {
