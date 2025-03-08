@@ -1,6 +1,6 @@
 package jsonapi
 
-import "github.com/lynx-go/fastapi/apierror"
+import "github.com/fluxstack/fluxbase/apierror"
 
 type M map[string]interface{}
 
