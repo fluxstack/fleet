@@ -44,5 +44,9 @@ func (uid UserID) Int64() int64 {
 	return cast.ToInt64(uid)
 }
 
+func (uid UserID) Valid() bool {
+	return uid != ""
+}
+
 const ContextKeyJWT = "_jwt"
 const ContextKeyCurrentUser = "_current_user"
