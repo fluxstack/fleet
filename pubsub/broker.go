@@ -29,7 +29,7 @@ var _ Broker = (*broker)(nil)
 
 type TopicOption struct {
 	Provider string            `json:"provider"`
-	Topic    string            `json:"topic"`
+	TopicID  string            `json:"topic_id"`
 	Kafka    *KafkaTopicOption `json:"kafka,omitempty"`
 }
 
