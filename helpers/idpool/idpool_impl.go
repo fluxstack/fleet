@@ -47,7 +47,7 @@ func (pool *idPools) get(ctx context.Context) (int64, error) {
 	ct := 0
 	for {
 		if ct > pool.o.MaxAttempts {
-			return 0, errors.New("生成 UID 失败")
+			return 0, errors.New("生成 ID 失败")
 		}
 		exists, err := pool.rdb.SIsMember(ctx, key, nextId).Result()
 		if err != nil {
