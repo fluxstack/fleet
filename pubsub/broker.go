@@ -22,7 +22,7 @@ type Broker interface {
 	hook.Hook
 	Topic(id TopicID) (*pubsub.Topic, error)
 	Subscription(id TopicID) (*pubsub.Subscription, error)
-	RegisterHandler(id TopicID, handler HandlerFunc)
+	RegisterHandlerFunc(id TopicID, handler HandlerFunc)
 }
 
 var _ Broker = (*broker)(nil)
@@ -88,7 +88,7 @@ func (b *broker) Start(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		handler := b.handlers[id]
+		h := b.handlers[id]
 		rctx, cancel := context.WithCancel(ctx)
 		b.g.Add(func() error {
 			var err error
@@ -98,7 +98,7 @@ func (b *broker) Start(ctx context.Context) error {
 				if err != nil {
 					break
 				}
-				if err = handler(rctx, msg.Body); err != nil {
+				if err = h(rctx, msg); err != nil {
 					break
 				}
 				msg.Ack()
@@ -130,7 +130,7 @@ func (b *broker) Subscription(id TopicID) (*pubsub.Subscription, error) {
 	return b.openSubscription(id)
 }
 
-func (b *broker) RegisterHandler(id TopicID, handler HandlerFunc) {
+func (b *broker) RegisterHandlerFunc(id TopicID, handler HandlerFunc) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.handlers[id] = handler
