@@ -1,4 +1,4 @@
-module github.com/fluxstack/flumix
+module github.com/fluxstack/fleet
 
 go 1.23.0
 

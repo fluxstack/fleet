@@ -1,7 +1,7 @@
 package jsonapi
 
 import (
-	"github.com/fluxstack/flumix/jsonapi/errors"
+	"github.com/fluxstack/fleet/jsonapi/errors"
 )
 
 type M map[string]interface{}

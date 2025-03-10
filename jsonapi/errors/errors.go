@@ -1,6 +1,6 @@
 package errors
 
-import "github.com/lynx-go/x/json"
+import "github.com/lynx-go/x/encoding/json"
 
 func New(code int, message string) *APIError {
 	return &APIError{
@@ -43,7 +43,8 @@ type ErrorItem struct {
 }
 
 func (e *APIError) Error() string {
-	return json.SafeMarshalString(e)
+	v, _ := json.MarshalToString(e)
+	return v
 }
 
 var _ error = new(APIError)

@@ -1,4 +1,4 @@
-package flumix
+package fleet
 
 import (
 	"context"
@@ -28,7 +28,7 @@ type API struct {
 }
 
 func (api *API) Name() string {
-	return "flumix"
+	return "fleet"
 }
 
 func (api *API) Start(ctx context.Context) error {
