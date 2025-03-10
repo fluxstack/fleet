@@ -34,11 +34,13 @@ type TopicOption struct {
 }
 
 type KafkaTopicOption struct {
-	Servers      []string `json:"servers"`
-	Topic        string   `json:"topic"`
-	Subscription struct {
-		Group string `json:"group"`
-	} `json:"subscription"`
+	Servers      []string           `json:"servers"`
+	Topic        string             `json:"topic"`
+	Subscription *KafkaSubscription `json:"subscription"`
+}
+
+type KafkaSubscription struct {
+	Group string `json:"group"`
 }
 
 type Option struct {
@@ -207,8 +209,8 @@ func (b *broker) openSubscription(topic TopicID) (*pubsub.Subscription, error) {
 }
 
 func (b *broker) openKafkaSubscription(o *KafkaTopicOption) (*pubsub.Subscription, error) {
-	if o.Subscription.Group == "" {
-		return nil, fmt.Errorf("no group specified")
+	if o.Subscription == nil || o.Subscription.Group == "" {
+		return nil, fmt.Errorf("no subscription.group specified")
 	}
 	config := kafkapubsub.MinimalConfig()
 	sub, err := kafkapubsub.OpenSubscription(o.Servers, config, o.Subscription.Group, []string{o.Topic}, nil)
