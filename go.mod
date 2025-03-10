@@ -6,7 +6,7 @@ toolchain go1.23.6
 
 require (
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/lynx-go/lynx v0.0.12
+	github.com/lynx-go/lynx v0.0.14
 	go.uber.org/multierr v1.11.0
 	gocloud.dev v0.40.0
 	golang.org/x/sync v0.12.0
