@@ -2,7 +2,7 @@ package pubsub
 
 import (
 	"context"
-	"github.com/lynx-go/x/json"
+	"github.com/lynx-go/x/encoding/json"
 )
 
 type HandlerFunc func(ctx context.Context, event []byte) error
