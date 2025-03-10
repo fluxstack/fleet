@@ -4,6 +4,7 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 	"github.com/lynx-go/x/encoding/json"
+	"github.com/samber/lo"
 	"gocloud.dev/pubsub"
 )
 
@@ -13,11 +14,9 @@ func New(source string, typ string, data any) *pubsub.Message {
 	event.SetID(id)
 	event.SetSource(source)
 	event.SetType(typ)
-	_ = event.SetData(cloudevents.ApplicationJSON, data)
-	msg, _ := event.MarshalJSON()
+	lo.Must0(event.SetData(cloudevents.ApplicationJSON, data))
 	return &pubsub.Message{
-		LoggableID: id,
-		Body:       msg,
+		Body: lo.Must1(event.MarshalJSON()),
 	}
 }
 
