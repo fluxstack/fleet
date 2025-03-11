@@ -20,9 +20,17 @@ func New(source string, typ string, data any) *pubsub.Message {
 	}
 }
 
-func Unmarshal(message *pubsub.Message, data any) error {
+func Unmarshal(message *pubsub.Message) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent()
 	if err := json.Unmarshal(message.Body, &event); err != nil {
+		return nil, err
+	}
+	return &event, nil
+}
+
+func DataAs(message *pubsub.Message, data any) error {
+	event, err := Unmarshal(message)
+	if err != nil {
 		return err
 	}
 	return event.DataAs(&data)
