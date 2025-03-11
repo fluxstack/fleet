@@ -87,6 +87,7 @@ func (b *broker) Start(ctx context.Context) error {
 		}
 		b.topics[id] = topic
 	}
+	b.mu.Unlock()
 
 	for id := range b.handlers {
 		sub, err := b.openSubscription(id)
@@ -125,6 +126,9 @@ func (b *broker) Stop(ctx context.Context) error {
 	for id := range b.topics {
 		topic := b.topics[id]
 		if err := topic.Shutdown(ctx); err != nil {
+			if errors.Is(err, context.Canceled) {
+				return nil
+			}
 			return err
 		}
 	}
