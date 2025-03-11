@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lynx-go/lynx/hook"
+	"github.com/lynx-go/x/log"
 	"github.com/oklog/run"
 	"gocloud.dev/pubsub"
 	"gocloud.dev/pubsub/kafkapubsub"
@@ -93,6 +94,7 @@ func (b *broker) Start(ctx context.Context) error {
 			return err
 		}
 		h := b.handlers[id]
+		log.InfoContext(ctx, "starting subscription for topic", "topic_id", id)
 		rctx, cancel := context.WithCancel(ctx)
 		b.g.Add(func() error {
 			var err error
