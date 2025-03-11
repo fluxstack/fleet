@@ -77,24 +77,46 @@ func (b *broker) Name() string {
 	return "pubsub-broker"
 }
 
-func (b *broker) Start(ctx context.Context) error {
+func (b *broker) addTopic(id TopicID, topic *pubsub.Topic) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+	b.topics[id] = topic
+}
+
+func (b *broker) addHandler(id TopicID, handler HandlerFunc) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.handlers[id] = handler
+}
+
+func (b *broker) getTopic(id TopicID) (*pubsub.Topic, bool) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	topic, ok := b.topics[id]
+	return topic, ok
+}
+
+func (b *broker) getHandler(id TopicID) HandlerFunc {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.handlers[id]
+}
+
+func (b *broker) Start(ctx context.Context) error {
 	for id := range b.o.Topics {
 		topic, err := b.openTopic(id)
 		if err != nil {
 			return err
 		}
-		b.topics[id] = topic
+		b.addTopic(id, topic)
 	}
-	b.mu.Unlock()
 
 	for id := range b.handlers {
 		sub, err := b.openSubscription(id)
 		if err != nil {
 			return err
 		}
-		h := b.handlers[id]
+		h := b.getHandler(id)
 		log.InfoContext(ctx, "starting subscription for topic", "topic_id", id)
 		rctx, cancel := context.WithCancel(ctx)
 		b.g.Add(func() error {
@@ -124,7 +146,8 @@ func (b *broker) Start(ctx context.Context) error {
 
 func (b *broker) Stop(ctx context.Context) error {
 	for id := range b.topics {
-		topic := b.topics[id]
+		topic, _ := b.getTopic(id)
+
 		if err := topic.Shutdown(ctx); err != nil {
 			if errors.Is(err, context.Canceled) {
 				return nil
@@ -144,24 +167,20 @@ func (b *broker) Subscription(id TopicID) (*pubsub.Subscription, error) {
 }
 
 func (b *broker) RegisterHandlerFunc(id TopicID, handler HandlerFunc) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	b.handlers[id] = handler
+	b.addHandler(id, handler)
 }
 
 func (b *broker) Topic(id TopicID) (*pubsub.Topic, error) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	topic, ok := b.topics[id]
+	topic, ok := b.getTopic(id)
 	if !ok {
 		var err error
 		topic, err = b.openTopic(id)
 		if err != nil {
 			return nil, err
 		}
-		b.mu.Lock()
-		b.topics[id] = topic
-		b.mu.Unlock()
+		b.addTopic(id, topic)
 	}
 
 	return topic, nil
@@ -189,18 +208,27 @@ func (b *broker) openKafkaTopic(o *KafkaTopicOption) (*pubsub.Topic, error) {
 	return topic, err
 }
 
-func (b *broker) openMemTopic(id TopicID) (*pubsub.Topic, error) {
+func (b *broker) getMemTopic(id TopicID) (*pubsub.Topic, bool) {
 	b.memMu.RLock()
 	defer b.memMu.RUnlock()
 
 	topic, ok := b.memTopics[id]
+	return topic, ok
+}
+
+func (b *broker) addMemTopic(id TopicID, topic *pubsub.Topic) {
+	b.memMu.Lock()
+	defer b.memMu.Unlock()
+	b.memTopics[id] = topic
+}
+
+func (b *broker) openMemTopic(id TopicID) (*pubsub.Topic, error) {
+	topic, ok := b.getMemTopic(id)
 	if ok {
 		return topic, nil
 	}
 	topic = mempubsub.NewTopic()
-	b.memMu.Lock()
-	b.memTopics[id] = topic
-	b.memMu.Unlock()
+	b.addMemTopic(id, topic)
 	return topic, nil
 }
 
