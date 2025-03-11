@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/lynx-go/lynx/hook"
 	"github.com/oklog/run"
@@ -54,6 +55,7 @@ func NewBroker(o Option) Broker {
 		g:             &run.Group{},
 		topics:        make(map[TopicID]*pubsub.Topic),
 		subscriptions: make(map[TopicID]*pubsub.Subscription),
+		handlers:      map[TopicID]HandlerFunc{},
 	}
 
 	return b
@@ -104,6 +106,9 @@ func (b *broker) Start(ctx context.Context) error {
 					break
 				}
 				msg.Ack()
+			}
+			if errors.Is(err, context.Canceled) {
+				return nil
 			}
 			return err
 		}, func(err error) {
