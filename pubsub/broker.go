@@ -23,8 +23,7 @@ func (t TopicID) String() string {
 type Broker interface {
 	hook.Hook
 	Topic(id TopicID) (*pubsub.Topic, error)
-	Subscription(id TopicID) (*pubsub.Subscription, error)
-	RegisterHandlerFunc(id TopicID, handler HandlerFunc)
+	On(id TopicID, handler HandlerFunc)
 }
 
 var _ Broker = (*broker)(nil)
@@ -166,7 +165,7 @@ func (b *broker) Subscription(id TopicID) (*pubsub.Subscription, error) {
 	return b.openSubscription(id)
 }
 
-func (b *broker) RegisterHandlerFunc(id TopicID, handler HandlerFunc) {
+func (b *broker) On(id TopicID, handler HandlerFunc) {
 	b.addHandler(id, handler)
 }
 
