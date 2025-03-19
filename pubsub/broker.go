@@ -56,6 +56,8 @@ func NewBroker(o Option) Broker {
 		topics:        make(map[TopicID]*pubsub.Topic),
 		subscriptions: make(map[TopicID]*pubsub.Subscription),
 		handlers:      map[TopicID]HandlerFunc{},
+		memMu:         sync.RWMutex{},
+		memTopics:     map[TopicID]*pubsub.Topic{},
 	}
 
 	return b
