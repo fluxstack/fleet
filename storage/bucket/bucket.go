@@ -11,11 +11,12 @@ import (
 
 type Bucket struct {
 	*blob.Bucket
+	name       string
 	exposedURL string
 }
 
 func (b *Bucket) ExposeURL(file string) string {
-	u, _ := url.JoinPath(b.exposedURL, file)
+	u, _ := url.JoinPath(b.exposedURL, b.name, file)
 	return u
 }
 
@@ -61,7 +62,7 @@ func NewManager(opts map[string]Option) (*Manager, error) {
 			if err != nil {
 				return nil, err
 			}
-			buckets[k] = &Bucket{Bucket: bucket, exposedURL: opt.ExposedURL}
+			buckets[k] = &Bucket{Bucket: bucket, exposedURL: opt.ExposedURL, name: k}
 		default:
 
 		}
