@@ -1,7 +1,75 @@
 package bucket
 
-import "gocloud.dev/blob"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"gocloud.dev/blob"
+	"gocloud.dev/blob/fileblob"
+	"net/http"
+)
 
 type Bucket struct {
 	*blob.Bucket
+	exposedURL string
+}
+
+func (b *Bucket) UploadFromURL(ctx context.Context, path string, url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if err := b.Bucket.Upload(ctx, path, resp.Body, &blob.WriterOptions{
+		ContentType: resp.Header.Get("Content-Type"),
+	}); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s", b.exposedURL, path), nil
+}
+
+type Option struct {
+	Provider   string       `json:"provider"`
+	Local      *LocalOption `json:"local"`
+	ExposedURL string       `json:"exposed_url"`
+}
+
+type LocalOption struct {
+	Dir string `json:"dir"`
+}
+
+type Manager struct {
+	buckets map[string]*Bucket
+}
+
+func NewManager(opts map[string]Option) (*Manager, error) {
+	buckets := make(map[string]*Bucket)
+	for k, opt := range opts {
+		switch opt.Provider {
+		case "local":
+			// Create a file-based bucket.
+			bucket, err := fileblob.OpenBucket(opt.Local.Dir, &fileblob.Options{
+				CreateDir:   true,
+				DirFileMode: 775,
+				NoTempDir:   true,
+			})
+			if err != nil {
+				return nil, err
+			}
+			buckets[k] = &Bucket{Bucket: bucket, exposedURL: opt.ExposedURL}
+		default:
+
+		}
+	}
+	return &Manager{
+		buckets: buckets,
+	}, nil
+}
+
+func (man *Manager) Get(bucket string) (*Bucket, error) {
+	b, ok := man.buckets[bucket]
+	if !ok {
+		return nil, errors.New("bucket not found")
+	}
+	return b, nil
 }
