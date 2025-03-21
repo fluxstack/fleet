@@ -7,11 +7,17 @@ import (
 	"gocloud.dev/blob"
 	"gocloud.dev/blob/fileblob"
 	"net/http"
+	"net/url"
 )
 
 type Bucket struct {
 	*blob.Bucket
 	exposedURL string
+}
+
+func (b *Bucket) ExposeURL(file string) string {
+	u, _ := url.JoinPath(b.exposedURL, file)
+	return u
 }
 
 func (b *Bucket) UploadFromURL(ctx context.Context, path string, url string) (string, error) {
@@ -64,6 +70,21 @@ func NewManager(opts map[string]Option) (*Manager, error) {
 	return &Manager{
 		buckets: buckets,
 	}, nil
+}
+
+func (man *Manager) ExposedURL(rawUrl string) string {
+	u, err := url.Parse(rawUrl)
+	if err != nil {
+		return rawUrl
+	}
+	if u.Scheme == "bucket" {
+		buc, err := man.Get(u.Host)
+		if err != nil {
+			return rawUrl
+		}
+		return buc.ExposeURL(u.Path)
+	}
+	return rawUrl
 }
 
 func (man *Manager) Get(bucket string) (*Bucket, error) {
