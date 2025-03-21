@@ -3,7 +3,6 @@ package bucket
 import (
 	"context"
 	"errors"
-	"fmt"
 	"gocloud.dev/blob"
 	"gocloud.dev/blob/fileblob"
 	"net/http"
@@ -20,18 +19,18 @@ func (b *Bucket) ExposeURL(file string) string {
 	return u
 }
 
-func (b *Bucket) UploadFromURL(ctx context.Context, path string, url string) (string, error) {
+func (b *Bucket) UploadFromURL(ctx context.Context, path string, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Body.Close()
 	if err := b.Bucket.Upload(ctx, path, resp.Body, &blob.WriterOptions{
 		ContentType: resp.Header.Get("Content-Type"),
 	}); err != nil {
-		return "", err
+		return err
 	}
-	return fmt.Sprintf("%s/%s", b.exposedURL, path), nil
+	return nil
 }
 
 type Option struct {

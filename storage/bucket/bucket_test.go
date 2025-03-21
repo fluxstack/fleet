@@ -19,7 +19,6 @@ func TestBucket_UploadFromURL(t *testing.T) {
 	require.NoError(t, err)
 	bucket, err := man.Get("default")
 	require.NoError(t, err)
-	fileUrl, err := bucket.UploadFromURL(ctx, "hello/test.jpg", url)
+	err := bucket.UploadFromURL(ctx, "hello/test.jpg", url)
 	require.NoError(t, err)
-	t.Log(fileUrl)
 }
